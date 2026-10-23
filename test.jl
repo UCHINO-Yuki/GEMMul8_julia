@@ -1,3 +1,12 @@
+import Pkg
+
+let required_packages = ["MultiFloats", "CSV", "DataFrames"]
+    missing_packages = filter(pkg -> isnothing(Base.find_package(pkg)), required_packages)
+    if !isempty(missing_packages)
+        Pkg.add(missing_packages)
+    end
+end
+
 using LinearAlgebra
 using MultiFloats
 using Random
@@ -39,7 +48,7 @@ for phi_i in [0.0, 1.0, 2.0, 4.0, 8.0, 16.0]
         (func="DGEMM", m=m, n=n, k=k, phi=phi, num_moduli=-1, max_rel_err=err_64),
     )
 
-    for num_moduli in 3:30
+    for num_moduli in 3:40
         C_emu = os2(A, B, num_moduli)
         err_64_emu = calc_err(C_emu, C_dd)
 
@@ -64,7 +73,7 @@ for phi_i in [0.0, 1.0, 2.0, 4.0, 8.0, 16.0]
         (func="SGEMM", m=m, n=n, k=k, phi=phi, num_moduli=-1, max_rel_err=err_32),
     )
 
-    for num_moduli in 3:30
+    for num_moduli in 3:40
         C_emu = os2(A32, B32, num_moduli)
         err_32_emu = calc_err(C_emu, C_dd)
 
