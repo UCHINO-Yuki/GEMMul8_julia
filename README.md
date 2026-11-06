@@ -1,58 +1,85 @@
 # GEMMul8_Julia
 
-## 1. Julia と作業フォルダを確認する
+## 0. Environment in the paper
+
+- Julia Version 1.12.6
+- Commit 15346901f0 (2026-04-09 19:20 UTC)
+- Build Info:
+  - Official https://julialang.org release
+- Platform Info:
+  - OS: Windows (x86_64-w64-mingw32)
+  - CPU: 8 × Intel(R) Core(TM) Ultra 9 288V
+  - WORD_SIZE: 64
+  - LLVM: libLLVM-18.1.7 (ORCJIT, arrowlake-s)
+  - GC: Built with stock GC
+- Threads: 1 default, 1 interactive, 1 GC (on 8 virtual cores)
+
+## 1. Set the working directory and verify Julia
+
+Navigate to the `GEMMul8_Julia` directory and check your Julia installation using the commands below.
+Replace the example path with the actual location of the directory.
+
+If the `julia` command is not found, install Julia if necessary, add the directory containing the Julia executable to your `PATH`, and restart your terminal.
 
 ### Windows PowerShell
 
 ```powershell
-Set-Location "C:\path\to\ozaki-julia"
+Set-Location "C:\path\to\GEMMul8_Julia"
 julia --version
 ```
 
 ### Linux / macOS
 
 ```bash
-cd "/path/to/ozaki-julia"
+cd "/path/to/GEMMul8_Julia"
 julia --version
 ```
 
-フォルダのパスは実際の保存先に置き換えてください。
-`julia` が見つからない場合は Julia をインストールし、`julia` コマンドのあるディレクトリを PATH に追加してから、ターミナルを開き直してください。
+## 2. Run the experiments
 
-## 2. コードを実行する
-
-PowerShell・Linux・macOS・WSL で共通です。
+Use the following command on Windows (PowerShell), Linux, macOS, or WSL:
 
 ```text
 julia --project=. test.jl
+julia --project=. select_moduli.jl
 ```
 
-実行が完了すると、`test.jl` と同じフォルダの `results.csv` を生成・上書きします。
-現在の設定は `m = 8`、`n = 8`、`k = 8192`、`phi = 0, 1, 2, 4, 8, 12`、法の個数 `3:40` です。
-変更する場合は `test.jl` 内の対応する値を編集してください。
+On completion, `test.jl` creates or overwrites `results.csv` in the directory containing the script.
+The current configuration uses the following settings:
 
-`test.jl` は `MultiFloats`・`CSV`・`DataFrames` を確認し、見つからないパッケージだけを自動追加します。
-`gemmul8.jl` が直接読み込む `LinearAlgebra` は Julia の標準ライブラリです。
+| Parameter         | Values                           |
+| ----------------- | -------------------------------- |
+| Matrix dimensions | `m = 8`, `n = 8`, `k = 8192`     |
+| Values of `phi`   | `0, 1, 2, 4, 8, 16`              |
+| Number of moduli  | `3:40` (3 through 40, inclusive) |
 
-## 3. 図を作成する
+To change these settings, edit the corresponding values in `test.jl`.
+
+`select_moduli.jl` creates or overwrites `select_moduli.csv` in the directory containing the script.
+The CSV file contains the data used in Table 1.
+
+The scripts check for the required Julia packages and automatically install any that are not found.
+
+## 3. Generate the plots
+
+Run the following command to generate plots from `results.csv`:
 
 ```text
 julia --project=. plot.jl
 ```
 
-`results.csv` を描画する。
-`plot.jl` は `CSV`・`DataFrames`・`Plots`・`LaTeXStrings` を確認し、見つからないものだけを自動追加します。
+`plot.jl` also checks for its required packages and automatically installs any that are not found.
+The generated figures are saved in the directory containing `plot.jl`.
 
-出力先は `plot.jl` と同じフォルダです。
+| Output file        | Description                      |
+| ------------------ | -------------------------------- |
+| `plot_S_error.png` | Comparison of SGEMM errors       |
+| `plot_D_error.png` | Comparison of DGEMM errors       |
+| `plot_S_bound.png` | Comparison of SGEMM error bounds |
+| `plot_D_bound.png` | Comparison of DGEMM error bounds |
 
-| 出力 | 内容 |
-| --- | --- |
-| `plot_S.png` | Float32 入力：FP64 CRT・Exact CRT・SGEMM の比較 |
-| `plot_D.png` | Float64 入力：Pseudo-DD CRT・Exact CRT・DGEMM の比較 |
+### Project environment and dependencies
 
-### パッケージの追加先
-
-`--project=.` は、カレントディレクトリを有効な Julia プロジェクトとして指定します。
-自動追加が必要な場合、`Pkg.add` はそのプロジェクトの `Project.toml` と `Manifest.toml` を作成・更新します。
-各スクリプトは `Base.find_package` で検索するため、Julia の読み込みパス上ですでに見つかるパッケージは追加しません。
-初回の追加・コンパイルには時間がかかることがあります。
+The `--project=.` option selects the current directory as the active Julia project.
+Each script uses `Base.find_package` to check whether its required packages are available.
+Packages already discoverable on Julia's load path are not added again.
