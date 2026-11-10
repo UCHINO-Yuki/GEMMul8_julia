@@ -1,5 +1,8 @@
 # GEMMul8_Julia
 
+This repository provides Julia code for validating the numerical accuracy and error analysis of Ozaki-II scheme.
+The implementation is not optimized for performance.
+
 ## 0. Environment in the paper
 
 - Julia Version 1.12.6
